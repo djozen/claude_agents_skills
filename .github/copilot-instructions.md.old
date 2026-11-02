@@ -1,0 +1,32 @@
+# Instructions Copilot
+
+## Skill : design-taste-frontend
+
+Utiliser le skill `design-taste-frontend` pour toute tâche liée à l'interface utilisateur (composants, pages, layouts, styles, animations).
+
+### Quand l'utiliser
+- Création ou refonte de composants UI, pages, formulaires, dashboards, landing pages.
+- Ajustements de style (couleurs, typographie, espacements, responsive).
+- Revue de la qualité visuelle et de l'ergonomie d'un code frontend.
+
+### Principes à appliquer
+- **Hiérarchie visuelle claire** : tailles, graisses et contrastes cohérents.
+- **Espacement cohérent** : échelle fixe (4/8px), contenu aéré.
+- **Typographie soignée** : 1–2 familles maximum, lisibilité avant tout.
+- **Palette sobre** : une couleur d'accent, neutres bien dosés, contrastes WCAG AA.
+- **Pas de rendu générique** : éviter l'aspect « template IA » (dégradés excessifs, ombres lourdes, emojis décoratifs, cartes identiques répétées).
+- **Détails raffinés** : états hover/focus/active/disabled, transitions subtiles (150–250 ms), rayons et bordures uniformes.
+- **Responsive** : mobile-first, vérifier les breakpoints courants.
+- **Accessibilité** : HTML sémantique, labels, navigation clavier, focus visible, ARIA si nécessaire.
+
+### Façon de procéder
+1. Lire le design system / tokens existants (couleurs, variables CSS, composants) et les réutiliser en priorité ; en cas de conflit avec les principes ci-dessus, la cohérence existante prévaut.
+2. Respecter la stack du projet sans ajouter de dépendances inutiles.
+3. Produire un code propre, composable, sans styles inline redondants.
+4. Gérer tous les états : chargement, vide, erreur, succès.
+5. N'expliquer les choix de design que sur demande.
+
+### À éviter
+- Casser la cohérence visuelle existante.
+- Valeurs en dur répétées au lieu de tokens/variables.
+- Animations excessives ou coûteuses en performance (privilégier `transform` et `opacity`, respecter `prefers-reduced-motion`).

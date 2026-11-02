@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Administration</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; display: flex; min-height: 100vh; background: #f4f6f9; color: #333; }
+  aside { width: 220px; background: #1f2937; color: #fff; padding: 20px 0; }
+  aside h2 { padding: 0 20px 20px; font-size: 18px; }
+  aside a { display: block; padding: 12px 20px; color: #cbd5e1; cursor: pointer; }
+  aside a:hover, aside a.active { background: #374151; color: #fff; }
+  main { flex: 1; display: flex; flex-direction: column; }
+  header { background: #fff; padding: 15px 25px; display: flex; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+  section { padding: 25px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
+  .card, .panel { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+  .card h3 { font-size: 14px; color: #6b7280; }
+  .card p { font-size: 28px; margin-top: 8px; font-weight: bold; }
+  form { display: flex; gap: 10px; margin: 15px 0; flex-wrap: wrap; }
+  input, select { padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; }
+  button { padding: 8px 14px; border: none; border-radius: 4px; background: #2563eb; color: #fff; cursor: pointer; }
+  button.del { background: #dc2626; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 10px; border-bottom: 1px solid #e5e7eb; }
+  .hidden { display: none; }
+  body { font-family: 'Segoe UI', system-ui, Arial, sans-serif; background: #f1f5f9; }
+  aside { background: linear-gradient(180deg, #0f172a, #1e293b); box-shadow: 2px 0 8px rgba(0,0,0,.15); }
+  aside h2 { font-size: 20px; letter-spacing: 1px; border-bottom: 1px solid #334155; margin-bottom: 10px; }
+  aside a { border-left: 3px solid transparent; transition: .2s; }
+  aside a.active { border-left-color: #3b82f6; background: #1e293b; }
+  header { border-bottom: 1px solid #e2e8f0; align-items: center; box-shadow: none; }
+  header strong { font-size: 18px; }
+  .card, .panel { border: 1px solid #e2e8f0; box-shadow: 0 1px 2px rgba(0,0,0,.04); border-radius: 10px; }
+  .card { border-top: 3px solid #3b82f6; }
+  .card:nth-child(2) { border-top-color: #10b981; }
+  .card:nth-child(3) { border-top-color: #f59e0b; }
+  .card:nth-child(4) { border-top-color: #ef4444; }
+  button { transition: .2s; font-weight: 600; }
+  button:hover { opacity: .85; }
+  th { font-size: 12px; text-transform: uppercase; color: #64748b; background: #f8fafc; }
+  tbody tr:hover { background: #f8fafc; }
+  input:focus, select:focus { outline: 2px solid #93c5fd; border-color: #3b82f6; }
+  .charts { display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-top: 15px; }
+  .charts .panel h3 { font-size: 15px; margin-bottom: 12px; }
+  .chart-box { position: relative; height: 260px; }
+  @media (max-width: 800px) { .charts { grid-template-columns: 1fr; } aside { width: 160px; } }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<aside>
+  <h2>Admin</h2>
+  <a class="active" data-page="dashboard">Tableau de bord</a>
+  <a data-page="users">Utilisateurs</a>
+  <a data-page="settings">Paramètres</a>
+</aside>
+<main>
+  <header>
+    <strong id="title">Tableau de bord</strong>
+    <span>Administrateur</span>
+  </header>
+
+  <section id="dashboard">
+    <div class="cards">
+      <div class="card"><h3>Utilisateurs</h3><p id="countUsers">0</p></div>
+      <div class="card"><h3>Administrateurs</h3><p id="countAdmin">0</p></div>
+      <div class="card"><h3>Visites (mois)</h3><p>12 480</p></div>
+      <div class="card"><h3>Revenus</h3><p>8 920 €</p></div>
+    </div>
+    <div class="charts">
+      <div class="panel"><h3>Visites par mois</h3><div class="chart-box"><canvas id="lineChart"></canvas></div></div>
+      <div class="panel"><h3>Répartition des rôles</h3><div class="chart-box"><canvas id="pieChart"></canvas></div></div>
+    </div>
+    <div class="charts" style="grid-template-columns:1fr">
+      <div class="panel"><h3>Revenus par trimestre</h3><div class="chart-box"><canvas id="barChart"></canvas></div></div>
+    </div>
+  </section>
+
+  <section id="users" class="hidden">
+    <div class="panel">
+      <h3>Gestion des utilisateurs</h3>
+      <form id="userForm">
+        <input id="name" placeholder="Nom" required>
+        <input id="email" type="email" placeholder="Email" required>
+        <select id="role"><option>Utilisateur</option><option>Admin</option></select>
+        <button type="submit">Ajouter</button>
+      </form>
+      <table>
+        <thead><tr><th>Nom</th><th>Email</th><th>Rôle</th><th>Actions</th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="settings" class="hidden">
+    <div class="panel">
+      <h3>Paramètres</h3>
+      <form onsubmit="event.preventDefault(); alert('Paramètres enregistrés');">
+        <input placeholder="Nom du site" value="Mon site">
+        <input type="email" placeholder="Email de contact">
+        <button type="submit">Enregistrer</button>
+      </form>
+    </div>
+  </section>
+</main>
+
+<script>
+  let users = [
+    { name: 'Alice', email: 'alice@example.com', role: 'Admin' },
+    { name: 'Bob', email: 'bob@example.com', role: 'Utilisateur' }
+  ];
+  const tbody = document.getElementById('tbody');
+
+  function render() {
+    tbody.innerHTML = '';
+    users.forEach((u, i) => {
+      const tr = document.createElement('tr');
+      [u.name, u.email, u.role].forEach(v => {
+        const td = document.createElement('td');
+        td.textContent = v;
+        tr.appendChild(td);
+      });
+      const td = document.createElement('td');
+      const b = document.createElement('button');
+      b.textContent = 'Supprimer';
+      b.className = 'del';
+      b.onclick = () => { users.splice(i, 1); render(); };
+      td.appendChild(b);
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+    });
+    document.getElementById('countUsers').textContent = users.length;
+    const admins = users.filter(u => u.role === 'Admin').length;
+    document.getElementById('countAdmin').textContent = admins;
+    if (window.pieChart) {
+      window.pieChart.data.datasets[0].data = [users.length - admins, admins];
+      window.pieChart.update();
+    }
+  }
+
+  if (window.Chart) {
+    new Chart(document.getElementById('lineChart'), {
+      type: 'line',
+      data: {
+        labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil'],
+        datasets: [{ label: 'Visites', data: [900, 1400, 1250, 1800, 2100, 1950, 2600],
+          borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,.15)', fill: true, tension: .4 }]
+      },
+      options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
+    });
+    new Chart(document.getElementById('barChart'), {
+      type: 'bar',
+      data: {
+        labels: ['T1', 'T2', 'T3', 'T4'],
+        datasets: [
+          { label: 'Produits', data: [3200, 4100, 3800, 5200], backgroundColor: '#10b981' },
+          { label: 'Services', data: [2100, 2600, 3000, 3400], backgroundColor: '#f59e0b' }
+        ]
+      },
+      options: { maintainAspectRatio: false }
+    });
+    window.pieChart = new Chart(document.getElementById('pieChart'), {
+      type: 'doughnut',
+      data: { labels: ['Utilisateurs', 'Admins'],
+        datasets: [{ data: [1, 1], backgroundColor: ['#3b82f6', '#ef4444'] }] },
+      options: { maintainAspectRatio: false }
+    });
+  }
+
+  document.getElementById('userForm').addEventListener('submit', e => {
+    e.preventDefault();
+    users.push({
+      name: document.getElementById('name').value,
+      email: document.getElementById('email').value,
+      role: document.getElementById('role').value
+    });
+    e.target.reset();
+    render();
+  });
+
+  document.querySelectorAll('aside a').forEach(a => {
+    a.addEventListener('click', () => {
+      document.querySelectorAll('aside a').forEach(x => x.classList.remove('active'));
+      a.classList.add('active');
+      ['dashboard', 'users', 'settings'].forEach(id =>
+        document.getElementById(id).classList.toggle('hidden', id !== a.dataset.page));
+      document.getElementById('title').textContent = a.textContent;
+    });
+  });
+
+  render();
+</script>
+</body>
+</html>
